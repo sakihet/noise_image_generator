@@ -6,7 +6,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 {
   (function () {
-    var VERSION = '0.0.0';
+    var VERSION = '1.0.0';
     var $ = function $(id) {
       return document.getElementById(id);
     };
@@ -28,7 +28,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
             var p = _step.value;
 
             p.addEventListener('change', function (e) {
-              _this.resize(_this.width, _this.height);
+              _this.resize(_this.width.value, _this.height.value);
               _this.draw();
             });
           }
@@ -50,23 +50,54 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         saveButton.addEventListener('click', function (e) {
           _this.save();
         });
+        this.resize(this.width.value, this.height.value);
+        this.draw();
       }
 
       _createClass(NoiseImageGenerator, [{
         key: 'draw',
         value: function draw() {
-          console.log('draw');
+          var ctx = this.canvas.getContext('2d');
+          var w = this.canvas.width;
+          var h = this.canvas.height;
+          ctx.clearRect(0, 0, w, h);
+          ctx.fillStyle = this.color.value;
+          ctx.fillRect(0, 0, w, h);
+          var inputImageData = ctx.getImageData(0, 0, w, h);
+          var inputData = inputImageData.data;
+          var outputImageData = ctx.getImageData(0, 0, w, h);
+          var outputData = outputImageData.data;
+          var th = this.threshold.value;
+          var num = w * h * 4;
+          for (var i = 0; i < num; i = i + 4) {
+            var r = this.myrand(-th, th);
+            outputData[i] = inputData[i] + r;
+            outputData[i + 1] = inputData[i + 1] + r;
+            outputData[i + 2] = inputData[i + 2] + r;
+            outputData[i + 3] = 255;
+          }
+          ctx.putImageData(outputImageData, 0, 0);
+          return;
         }
       }, {
         key: 'resize',
-        value: function resize() {
-          console.log('resize');
+        value: function resize(w, h) {
+          this.canvas.width = w;
+          this.canvas.height = h;
+          return;
         }
       }, {
         key: 'save',
         value: function save() {
-          console.log('save');
-          window.open(this.cv);
+          window.open(this.canvas.toDataURL('image/png'));
+          return;
+        }
+      }, {
+        key: 'myrand',
+        value: function myrand(min, max) {
+          var r = Math.floor(Math.random() * (max - min) + 1);
+          r += min;
+          return r;
         }
       }]);
 
